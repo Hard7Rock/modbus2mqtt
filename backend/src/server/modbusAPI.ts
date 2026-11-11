@@ -306,9 +306,9 @@ export class ModbusAPI implements IModbusAPI, IconsumerModbusAPI {
         stopBits: (rtu.stopBits ?? DEFAULT_SERIAL_STOPBITS) as 1 | 2,
       })
     } else {
-      const host = (this.modbusConfiguration.getModbusConnection() as ITCPConnection).host
-      const tcpport = (this.modbusConfiguration.getModbusConnection() as ITCPConnection).port
-      return this.modbusClient.connectTCP(host, { port: tcpport })
+      const tcp = this.modbusConfiguration.getModbusConnection() as ITCPConnection
+      if (tcp.rtuOverTcp) return this.modbusClient.connectTcpRTUBuffered(tcp.host, { port: tcp.port })
+      return this.modbusClient.connectTCP(tcp.host, { port: tcp.port })
     }
   }
   private connectRTUClient(): Promise<void> {

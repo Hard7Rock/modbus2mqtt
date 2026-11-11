@@ -120,6 +120,7 @@ export class Bus implements IModbusConfiguration {
       if (!connectionTcp.host || connectionTcp.host !== tcp.host) return true
       if (!connectionTcp.port || connectionTcp.port !== tcp.port) return true
       if (!connectionTcp.timeout || connectionTcp.timeout !== tcp.timeout) return true
+      if (!!connectionTcp.rtuOverTcp !== !!tcp.rtuOverTcp) return true
       return false
     }
   }

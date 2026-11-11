@@ -4,7 +4,7 @@ A bridge that exposes Modbus (RTU/TCP) devices over MQTT, with native support fo
 
 ## Features
 
-- Modbus RTU (serial) and Modbus TCP support
+- Modbus RTU (serial), Modbus TCP and Modbus RTU over TCP support
 - MQTT publishing with Home Assistant MQTT auto-discovery
 - Web UI to browse buses, slaves, and specifications
 - Device *specifications* — reusable register-to-MQTT mappings that can be contributed back to the community

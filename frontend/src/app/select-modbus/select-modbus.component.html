@@ -179,6 +179,13 @@
                       <input type="number" matInput formControlName="timeout" />
                     </mat-form-field>
                   </div>
+                  <div>
+                    <mat-checkbox
+                      formControlName="rtuOverTcp"
+                      matTooltip="For serial to ethernet gateways in transparent mode: send Modbus RTU frames (with CRC) over the TCP socket instead of Modbus TCP"
+                      >RTU over TCP</mat-checkbox
+                    >
+                  </div>
                 </div>
               </mat-tab>
             </mat-tab-group>

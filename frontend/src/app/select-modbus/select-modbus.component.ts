@@ -38,6 +38,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field'
 import { MatIcon } from '@angular/material/icon'
 import { MatIconButton } from '@angular/material/button'
 import { MatTooltip } from '@angular/material/tooltip'
+import { MatCheckbox } from '@angular/material/checkbox'
 import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card'
 
 @Component({
@@ -61,6 +62,7 @@ import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/m
     MatInput,
     MatSelect,
     MatOption,
+    MatCheckbox,
   ],
 })
 export class SelectModbusComponent implements AfterViewInit, OnDestroy {
@@ -186,6 +188,8 @@ export class SelectModbusComponent implements AfterViewInit, OnDestroy {
         if (br) br.setValue(port)
         const to = fg.get(['tcp', 'timeout'])
         if (to) to.setValue(timeout)
+        const rot = fg.get(['tcp', 'rtuOverTcp'])
+        if (rot) rot.setValue(!!(bus.connectionData as ITCPConnection).rtuOverTcp)
       }
     }
   }
@@ -272,6 +276,9 @@ export class SelectModbusComponent implements AfterViewInit, OnDestroy {
           ;(connectionData as ITCPConnection).port = port.value
           ;(connectionData as ITCPConnection).timeout = timeout.value
         }
+        const rtuOverTcp = fg.get(['tcp', 'rtuOverTcp']) as FormControl
+        if (rtuOverTcp && rtuOverTcp.value) (connectionData as ITCPConnection).rtuOverTcp = true
+        else delete (connectionData as ITCPConnection).rtuOverTcp
         delete (connectionData as any).serialport
         delete (connectionData as any).baudrate
       }
@@ -329,6 +336,7 @@ export class SelectModbusComponent implements AfterViewInit, OnDestroy {
         host: ['', Validators.required],
         port: [502, Validators.required],
         timeout: [BUS_TIMEOUT_DEFAULT, Validators.required],
+        rtuOverTcp: [false],
       }),
     })
     return fg

@@ -13,7 +13,13 @@ import {
   LogLevelEnum,
 } from '../../src/specification/index.js'
 import { ModbusAPI } from '../../src/server/modbusAPI.js'
-import { MAX_REGISTERS_PER_REQUEST_DEFAULT, ModbusTasks, IRTUConnection, getConnectionName } from '../../src/shared/server/index.js'
+import {
+  MAX_REGISTERS_PER_REQUEST_DEFAULT,
+  ModbusTasks,
+  IRTUConnection,
+  ITCPConnection,
+  getConnectionName,
+} from '../../src/shared/server/index.js'
 import { TempConfigDirHelper, getAvailablePort } from './testhelper.js'
 
 const debug = Debug('bustest')
@@ -278,5 +284,48 @@ describe('serial framing', () => {
     expect(
       getConnectionName({ serialport: '/dev/ttyUSB0', baudrate: 9600, timeout: 100, parity: 'even' } as IRTUConnection)
     ).toContain('9600 8E1')
+  })
+})
+
+// Serial-to-ethernet gateways in transparent mode forward raw RTU frames (with CRC) over a TCP socket
+// instead of translating them to Modbus TCP. Such a bus must be opened with RTU framing on the socket.
+describe('RTU over TCP', () => {
+  function connectCallFor(connection: Partial<ITCPConnection>): { method: string; host: string; opts: Record<string, unknown> } {
+    const modbusAPI = new ModbusAPI({
+      getId: () => 0,
+      getName: () => 'rtuovertcp',
+      getSlaveTimeoutBySlaveId: () => 100,
+      getMaxRegistersPerRequestBySlaveId: () => 125,
+      getModbusConnection: () => ({ host: '192.168.1.10', port: 4001, timeout: 100, ...connection }) as ITCPConnection,
+    })
+    let call = { method: '', host: '', opts: {} as Record<string, unknown> }
+    const record = (method: string) => (host: string, opts: Record<string, unknown>) => {
+      call = { method, host, opts }
+      return Promise.resolve()
+    }
+    modbusAPI['modbusClient'] = {
+      isOpen: false,
+      connectTCP: record('connectTCP'),
+      connectTcpRTUBuffered: record('connectTcpRTUBuffered'),
+    } as any
+    modbusAPI['connectRTUClientLocked']()
+    return call
+  }
+
+  it('uses Modbus TCP when RTU over TCP is not configured', () => {
+    expect(connectCallFor({})).toEqual({ method: 'connectTCP', host: '192.168.1.10', opts: { port: 4001 } })
+  })
+
+  it('uses RTU framing on the socket when RTU over TCP is configured', () => {
+    expect(connectCallFor({ rtuOverTcp: true })).toEqual({
+      method: 'connectTcpRTUBuffered',
+      host: '192.168.1.10',
+      opts: { port: 4001 },
+    })
+  })
+
+  it('shows RTU over TCP in the bus name', () => {
+    expect(getConnectionName({ host: 'gw', port: 4001, timeout: 100 })).toBe('TCP: gw:4001 t: 100')
+    expect(getConnectionName({ host: 'gw', port: 4001, timeout: 100, rtuOverTcp: true })).toBe('RTU over TCP: gw:4001 t: 100')
   })
 })

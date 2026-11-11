@@ -76,6 +76,9 @@ export interface ITCPConnection {
   host: string
   port: number
   timeout: number
+  // Serial-to-ethernet gateways in transparent mode forward raw RTU frames (with CRC) instead of
+  // translating them to Modbus TCP. Such a gateway answers Modbus TCP requests with garbage or not at all.
+  rtuOverTcp?: boolean
 }
 
 export type IModbusConnection = IRTUConnection | ITCPConnection
@@ -132,7 +135,7 @@ export function getConnectionName(connection: IModbusConnection): string {
     return 'RTU: ' + c.serialport + '(' + c.baudrate + ' ' + getSerialFraming(c) + ') t: ' + c.timeout
   } else {
     const c = connection as ITCPConnection
-    return 'TCP: ' + c.host + ':' + c.port + ' t: ' + (c.timeout ? c.timeout : 100)
+    return (c.rtuOverTcp ? 'RTU over TCP: ' : 'TCP: ') + c.host + ':' + c.port + ' t: ' + (c.timeout ? c.timeout : 100)
   }
 }
 export interface ImodbusError {

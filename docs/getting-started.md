@@ -57,6 +57,8 @@ A "bus" represents a physical connection to your Modbus devices.
    - **Host**: IP address of your Modbus TCP device
    - **Port**: `502` (default Modbus TCP port)
    - **Timeout**: `1000` ms
+   - **RTU over TCP**: tick this for a serial-to-ethernet gateway in transparent mode, which forwards raw
+     Modbus RTU frames (with CRC) over the socket instead of speaking Modbus TCP. Use the gateway's port (often not `502`).
 4. Click **Save**
 
 ### 4. Add a Device (Slave)
