@@ -49,6 +49,10 @@ jobs:
     outputs:
       resolved_version: ${{ steps.setver.outputs.resolved_version }}
     steps:
+      # Image names must be lowercase; a fork owner like "Hard7Rock" would be rejected by docker.
+      - name: Lowercase docker image name
+        run: echo "main_docker_name=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/${{ env.product_name }}" >> $GITHUB_ENV
+
       - name: Checkout
         uses: actions/checkout@v5
         with:
@@ -163,6 +167,10 @@ jobs:
     needs: build-and-release
     environment: release
     steps:
+      # Image names must be lowercase; a fork owner like "Hard7Rock" would be rejected by docker.
+      - name: Lowercase docker image name
+        run: echo "main_docker_name=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/${{ env.product_name }}" >> $GITHUB_ENV
+
       - name: Checkout modbus2mqtt Repository
         uses: actions/checkout@v5
 
